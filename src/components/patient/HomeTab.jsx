@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { QrCode, Droplets, CalendarCheck, Medal } from 'lucide-react';
+import { QrCode, Droplets, CalendarCheck, Medal, ClipboardCheck } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useApp } from '../../context/AppContext';
 import StatusScreen from './StatusScreen';
@@ -13,12 +13,6 @@ export default function HomeTab({ onShowQuestionnaire }) {
   const [showCompletion, setShowCompletion] = useState(false);
   const [showPathModal, setShowPathModal] = useState(false);
   
-  useEffect(() => {
-    if (donor?.status === 'checked-in' && !donor.currentVisit?.questionnaireCompleted) {
-      onShowQuestionnaire();
-    }
-  }, [donor?.status, donor?.currentVisit?.questionnaireCompleted, onShowQuestionnaire]);
-
   useEffect(() => {
     if (donor?.status === 'completed') {
       const hasSeen = sessionStorage.getItem(`confetti_${donor.id}_${donor.totalDonations}`);
@@ -90,41 +84,79 @@ export default function HomeTab({ onShowQuestionnaire }) {
       {/* Gamification Section */}
       <div 
         className="mob-card" 
-        style={{ marginBottom: '1.5rem', background: 'var(--doc-bg-darker)', cursor: 'pointer', transition: 'transform 0.2s', ':active': { transform: 'scale(0.98)' } }}
+        style={{ marginBottom: '1.5rem', background: 'var(--mob-surface)', cursor: 'pointer', transition: 'transform 0.2s' }}
         onClick={() => setShowPathModal(true)}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <div>
             <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>{t('donor_path')}</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--doc-text-muted)' }}>
-              {t('donations_count')}: <strong style={{ color: '#fff' }}>{donations}</strong>
+            <p style={{ fontSize: '0.85rem', color: 'var(--mob-text-muted)' }}>
+              {t('donations_count')}: <strong style={{ color: 'var(--mob-text)', fontWeight: 700 }}>{donations}</strong>
             </p>
           </div>
-          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.6rem', borderRadius: '50%' }}>
-            <Medal size={32} color={prevMilestone.color} style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.5))' }} />
+          <div style={{ background: 'var(--mob-bg)', padding: '0.6rem', borderRadius: '50%' }}>
+            <Medal size={32} color={prevMilestone.color} />
           </div>
         </div>
 
         {/* Progress Bar */}
-        <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.5rem' }}>
+        <div style={{ height: '6px', background: 'var(--mob-border)', borderRadius: '4px', overflow: 'hidden', marginBottom: '0.5rem' }}>
           <div style={{ height: '100%', width: `${progressPercent}%`, background: 'var(--primary)', borderRadius: '4px', transition: 'width 1s ease-out' }} />
         </div>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--doc-text-muted)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--mob-text-muted)' }}>
           <span>{prevMilestone.target > 0 ? prevMilestone.label : ''}</span>
           <span>{currentMilestone.target} ({currentMilestone.label})</span>
         </div>
       </div>
 
-      {(donor.status === 'registered' || donor.status === 'scanned' || (donor.status === 'completed' && !showCompletion)) ? (
+      {donor.status === 'rejected' ? (
+        <StatusScreen />
+      ) : (
         <>
+          {donor.status === 'completed' && showCompletion && (
+            <div className="mob-card animate-slide-up" style={{ marginBottom: '1.5rem', background: 'var(--success-soft)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1rem', textAlign: 'center' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--success)' }}>
+                {t('status_completed_title')}
+              </h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--mob-text-secondary)', margin: '0.25rem 0 0 0' }}>
+                {t('status_completed_desc')}
+              </p>
+            </div>
+          )}
+
+          {donor.status !== 'registered' && donor.status !== 'scanned' && donor.status !== 'completed' && donor.status !== 'rejected' && (
+            <div className="mob-card animate-slide-up" style={{ marginBottom: '1.5rem', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--mob-text)' }}>
+                {t('status_queue_title')} <span style={{ color: 'var(--primary)', fontSize: '1.1rem' }}>#{donor.currentVisit?.queueNumber || '-'}</span>
+              </h3>
+              <p style={{ fontSize: '0.82rem', color: 'var(--mob-text-secondary)', margin: 0 }}>
+                {donor.status === 'documents' ? t('watch_board_documents') : t('watch_board')}
+              </p>
+              
+              {!donor.currentVisit?.questionnaireCompleted && onShowQuestionnaire && (
+                <button
+                  className="mob-btn mob-btn-primary"
+                  onClick={onShowQuestionnaire}
+                  style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.85rem', alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <ClipboardCheck size={16} />
+                  {t('btn_fill_questionnaire')}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* QR Code Section */}
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <p style={{ color: 'var(--mob-text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
-              {donor.status === 'registered' || donor.status === 'scanned' ? 'Покажите этот QR-код на стойке регистрации' : 'Ваш идентификатор'}
+              {donor.status === 'registered' || donor.status === 'scanned' ? t('qr_show_hint') : t('qr_your_id')}
             </p>
-            <div className="mob-qr">
+            <div className="mob-qr scanner-laser-container">
               <QrCode size={160} color="var(--doc-text)" />
+              {(donor.status === 'registered' || donor.status === 'scanned') && (
+                <div className="scanner-laser-line" />
+              )}
             </div>
             <p style={{ fontWeight: 700, fontSize: '1.2rem', letterSpacing: '2px' }}>
               {donor.id.toUpperCase()}
@@ -140,8 +172,6 @@ export default function HomeTab({ onShowQuestionnaire }) {
             </div>
           )}
         </>
-      ) : (
-        <StatusScreen onShowQuestionnaire={onShowQuestionnaire} />
       )}
 
       {showPathModal && <DonorPathModal onClose={() => setShowPathModal(false)} />}

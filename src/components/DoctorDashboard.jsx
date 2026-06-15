@@ -9,7 +9,7 @@ import CompletedList from './doctor/CompletedList';
 import PatientDetailModal from './doctor/PatientDetailModal';
 
 export default function DoctorDashboard() {
-  const { searchDonors } = useApp();
+  const { searchDonors, docT } = useApp();
   const [activeTab, setActiveTab] = useState('queue');
   const [selectedPatientId, setSelectedPatientId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,7 +40,7 @@ export default function DoctorDashboard() {
               <input
                 className="doc-search-input"
                 type="text"
-                placeholder="Поиск по имени, телефону, группе крови..."
+                placeholder={docT('doc_search_placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -66,18 +66,18 @@ export default function DoctorDashboard() {
               {searchQuery.trim() === '' ? (
                 <div className="doc-empty">
                   <Search size={48} />
-                  <p>Введите запрос для поиска доноров</p>
+                  <p>{docT('doc_search_empty')}</p>
                 </div>
               ) : searchResults.length === 0 ? (
                 <div className="doc-empty">
                   <Search size={48} />
-                  <p>Ничего не найдено по запросу «{searchQuery}»</p>
+                  <p>{docT('doc_search_no_results').replace('{query}', searchQuery)}</p>
                 </div>
               ) : (
                 <div className="doc-card">
                   <div className="doc-card-header">
                     <span>
-                      Результаты ({searchResults.length})
+                      {docT('doc_search_results')} ({searchResults.length})
                     </span>
                   </div>
                   {searchResults.map((donor) => {
@@ -106,7 +106,7 @@ export default function DoctorDashboard() {
                           </div>
                           <div className="doc-list-item-meta">
                             {donor.bloodType} · {donor.phone} ·{' '}
-                            Донаций: {donor.totalDonations}
+                            {docT('doc_search_donations')}: {donor.totalDonations}
                           </div>
                         </div>
                       </div>

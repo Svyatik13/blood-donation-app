@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { translations } from '../i18n';
+import { storage } from '../platform/storage';
 
 const AppContext = createContext(null);
-
-const STORAGE_KEY = 'bloodlife_data';
 
 // Generate unique ID
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -21,20 +20,20 @@ export const formatElapsed = (startTime) => {
 const INITIAL_DONORS = [
   {
     id: 'demo-001',
-    firstName: 'Иван',
-    lastName: 'Иванов',
-    middleName: 'Петрович',
+    firstName: 'Jan',
+    lastName: 'Novák',
+    middleName: '',
     dateOfBirth: '1985-03-15',
     gender: 'male',
     bloodType: 'A+',
-    phone: '+7 (999) 123-45-67',
+    phone: '+420 999 123 456',
     email: 'ivanov@email.com',
-    passportNumber: '4510 123456',
-    address: 'г. Москва, ул. Ленина, д. 10',
+    passportNumber: '123456789',
+    address: 'Praha, ul. Václavská 10',
     weight: 82,
-    chronicDiseases: 'Нет',
-    allergies: 'Нет',
-    medications: 'Нет',
+    chronicDiseases: 'Ne',
+    allergies: 'Ne',
+    medications: 'Ne',
     password: '1234',
     registeredAt: Date.now() - 86400000 * 30,
     totalDonations: 5,
@@ -42,8 +41,8 @@ const INITIAL_DONORS = [
     status: 'registered',
     currentVisit: null,
     donationHistory: [
-      { date: '2026-04-01', bloodVolume: 450, location: 'Кабинет А', doctor: 'Др. Смирнова', bloodType: 'A+', notes: '' },
-      { date: '2025-12-10', bloodVolume: 450, location: 'Кабинет Б', doctor: 'Др. Козлов', bloodType: 'A+', notes: '' }
+      { date: '2026-04-01', bloodVolume: 450, location: 'Místnost A', doctor: 'MUDr. Nováková', bloodType: 'A+', notes: '' },
+      { date: '2025-12-10', bloodVolume: 450, location: 'Místnost B', doctor: 'MUDr. Svoboda', bloodType: 'A+', notes: '' }
     ]
   }
 ];
@@ -56,6 +55,8 @@ export const bloodTypeColors = {
   'O+': '#E67E22', 'O-': '#D35400',
 };
 
+const STORAGE_KEY = 'bloodlife_data';
+
 // Room options
 export const ROOMS = ['Místnost A', 'Místnost B', 'Místnost C'];
 export const DOCTORS = ['MUDr. Nováková', 'MUDr. Svoboda', 'MUDr. Dvořák'];
@@ -63,16 +64,15 @@ export const DOCTORS = ['MUDr. Nováková', 'MUDr. Svoboda', 'MUDr. Dvořák'];
 export function AppProvider({ children }) {
   const [state, setState] = useState(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = storage.get(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          return { donors: parsed, queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10) };
+        if (Array.isArray(stored)) {
+          return { donors: stored, queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10) };
         }
-        return parsed;
+        return stored;
       }
     } catch (e) { /* ignore */ }
-    return { donors: INITIAL_DONORS, queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10), theme: 'dark' };
+    return { donors: INITIAL_DONORS, queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10), theme: 'light' };
   });
 
   const donors = state.donors || INITIAL_DONORS;
@@ -97,14 +97,15 @@ export function AppProvider({ children }) {
     }
   }, [state.lastQueueDate]);
 
-  // Active patient on the mobile simulator
-  const [activeDonorId, setActiveDonorId] = useState(null);
+  // Active patient — stored in persisted state so updateDonor doesn't wipe it
+  const activeDonorId = state.activeDonorId || null;
+  const setActiveDonorId = (id) => setState(prev => ({ ...prev, activeDonorId: id }));
 
   // Language state
-  const [lang, setLang] = useState(() => localStorage.getItem('bloodlife_lang') || 'cs');
+  const [lang, setLang] = useState(() => storage.getString('bloodlife_lang') || 'cs');
   
   useEffect(() => {
-    localStorage.setItem('bloodlife_lang', lang);
+    storage.setString('bloodlife_lang', lang);
   }, [lang]);
 
   const toggleTheme = () => {
@@ -128,9 +129,9 @@ export function AppProvider({ children }) {
   // Notification state (for doctor panel)
   const [notifications, setNotifications] = useState([]);
 
-  // Save to localStorage on change
+  // Persist state
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    storage.set(STORAGE_KEY, state);
   }, [state]);
 
   // Sync state across different tabs
@@ -147,8 +148,8 @@ export function AppProvider({ children }) {
   // ---- Helpers ----
   const getActiveDonor = useCallback(() => {
     if (!activeDonorId) return null;
-    return donors.find(d => d.id === activeDonorId) || null;
-  }, [activeDonorId, donors]);
+    return state.donors?.find(d => d.id === activeDonorId) || null;
+  }, [activeDonorId, state.donors]);
 
   const getDonorById = useCallback((id) => {
     return donors.find(d => d.id === id) || null;
@@ -181,12 +182,12 @@ export function AppProvider({ children }) {
     setState(prev => {
       const currentDonors = Array.isArray(prev) ? prev : (prev.donors || []);
       const restState = Array.isArray(prev) 
-        ? { queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10), theme: 'dark' } 
+        ? { queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10), theme: 'light' } 
         : prev;
       return { ...restState, donors: [...currentDonors, newDonor] };
     });
     setActiveDonorId(newDonor.id);
-    addNotification(`Новый донор зарегистрирован: ${data.lastName} ${data.firstName}`, 'info');
+    addNotification(`Nový dárce zaregistrován: ${data.lastName} ${data.firstName}`, 'info');
     return newDonor;
   }, [addNotification]);
 
@@ -229,29 +230,18 @@ export function AppProvider({ children }) {
     setState(prev => {
       const currentDonors = Array.isArray(prev) ? prev : (prev.donors || []);
       const restState = Array.isArray(prev) 
-        ? { queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10), theme: 'dark' } 
+        ? { queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10), theme: 'light' } 
         : prev;
       return { ...restState, donors: [...currentDonors, testDonor] };
     });
     setActiveDonorId(testDonor.id);
-    addNotification(`Test mode started!`, 'warning');
+    addNotification(`Testovací režim zahájen!`, 'warning');
     return testDonor;
   }, [addNotification]);
 
   const logoutDonor = useCallback(() => {
-    setActiveDonorId(null);
+    setState(prev => ({ ...prev, activeDonorId: null }));
   }, []);
-
-  const scanQrCode = useCallback((donorId) => {
-    setState(prev => {
-      const newDonors = prev.donors.map(d => {
-        if (d.id !== donorId) return d;
-        return { ...d, status: 'scanned' };
-      });
-      return { ...prev, donors: newDonors };
-    });
-    addNotification('QR kód naskenován. Čeká se na ověření totožnosti.', 'success');
-  }, [addNotification]);
 
   const checkIn = useCallback((donorId) => {
     const today = new Date().toISOString().slice(0, 10);
@@ -271,6 +261,9 @@ export function AppProvider({ children }) {
             questionnaireCompleted: false,
             systolic: null,
             diastolic: null,
+            heartRate: null,
+            temperature: null,
+            hemoglobin: null,
             bloodSampleTakenAt: null,
             resultsReadyAt: null,
             rejectionReason: null,
@@ -293,9 +286,14 @@ export function AppProvider({ children }) {
     
     const donor = getDonorById(donorId);
     if (donor) {
-      addNotification(`${donor.lastName} ${donor.firstName} получил номерок`, 'warning');
+      addNotification(`${donor.lastName} ${donor.firstName} obdržel číslo`, 'warning');
     }
   }, [getDonorById, addNotification]);
+
+  const scanQrCode = useCallback((donorId) => {
+    checkIn(donorId);
+    addNotification('QR kód naskenován. Číslo ve frontě přiděleno.', 'success');
+  }, [checkIn, addNotification]);
 
   const submitQuestionnaire = useCallback((donorId, answers = {}) => {
     setState(prev => ({
@@ -315,21 +313,26 @@ export function AppProvider({ children }) {
     }));
     const donor = getDonorById(donorId);
     if (donor) {
-      addNotification(`Анкета заполнена (Номерок #${donor.currentVisit?.queueNumber})`, 'info');
+      addNotification(`Dotazník vyplněn (Číslo #${donor.currentVisit?.queueNumber})`, 'info');
     }
   }, [getDonorById, addNotification]);
 
-  // ---- Doctor Actions ----
-  const acceptDocuments = useCallback((donorId) => {
+  // ---- Doctor / Reception Actions ----
+  const approveQuestionnaire = useCallback((donorId) => {
     updateDonor(donorId, { status: 'documents' });
-    addNotification(`Документы приняты`, 'info');
+    addNotification(`Dotazník schválen. Čeká se na doklady.`, 'success');
+  }, [updateDonor, addNotification]);
+
+  const acceptDocuments = useCallback((donorId) => {
+    updateDonor(donorId, { status: 'pressure' });
+    addNotification(`Doklady přijaty. Přechod k vyšetření.`, 'info');
   }, [updateDonor, addNotification]);
 
   const startPressure = useCallback((donorId) => {
     updateDonor(donorId, { status: 'pressure' });
   }, [updateDonor]);
 
-  const approvePressure = useCallback((donorId, sys, dia) => {
+  const approveVitals = useCallback((donorId, sys, dia, pulse, temp, hemo) => {
     setState(prev => ({
       ...prev,
       donors: prev.donors.map(d => {
@@ -337,11 +340,18 @@ export function AppProvider({ children }) {
         return {
           ...d,
           status: 'blood-sample',
-          currentVisit: { ...d.currentVisit, systolic: sys, diastolic: dia }
+          currentVisit: { 
+            ...d.currentVisit, 
+            systolic: sys, 
+            diastolic: dia,
+            heartRate: pulse,
+            temperature: temp,
+            hemoglobin: hemo
+          }
         };
       })
     }));
-    addNotification(`Давление в норме, переход к анализу`, 'success');
+    addNotification(`Vyšetření tlaku a vitálních funkcí dokončeno`, 'success');
   }, [addNotification]);
 
   const rejectDonor = useCallback((donorId, reason) => {
@@ -356,7 +366,7 @@ export function AppProvider({ children }) {
         };
       })
     }));
-    addNotification(`Отказ: ${reason}`, 'error');
+    addNotification(`Odmítnutí: ${reason}`, 'error');
   }, [addNotification]);
 
   const acknowledgeRejection = useCallback((donorId) => {
@@ -385,7 +395,7 @@ export function AppProvider({ children }) {
         };
       })
     }));
-    addNotification(`Образец взят, ожидание результатов`, 'info');
+    addNotification(`Vzorek odebrán, čeká se na výsledky`, 'info');
   }, [addNotification]);
 
   const resultsReady = useCallback((donorId) => {
@@ -400,7 +410,7 @@ export function AppProvider({ children }) {
         };
       })
     }));
-    addNotification(`Результаты анализа готовы`, 'warning');
+    addNotification(`Výsledky analýzy jsou hotové`, 'warning');
   }, [addNotification]);
 
   const doctorApprove = useCallback((donorId, room, doctor) => {
@@ -420,7 +430,7 @@ export function AppProvider({ children }) {
         };
       })
     }));
-    addNotification(`Допущен. Направлен в ${room}`, 'success');
+    addNotification(`Schválen. Směřován do ${room}`, 'success');
   }, [addNotification]);
 
   const completeDonation = useCallback((donorId, bloodVolume, notes) => {
@@ -435,7 +445,12 @@ export function AppProvider({ children }) {
           location: visit?.assignedRoom || 'N/A',
           doctor: visit?.assignedDoctor || 'N/A',
           bloodType: d.bloodType,
-          notes: notes || visit?.notes || ''
+          notes: notes || visit?.notes || '',
+          systolic: visit?.systolic || null,
+          diastolic: visit?.diastolic || null,
+          heartRate: visit?.heartRate || null,
+          temperature: visit?.temperature || null,
+          hemoglobin: visit?.hemoglobin || null
         };
         return {
           ...d,
@@ -447,7 +462,7 @@ export function AppProvider({ children }) {
         };
       })
     }));
-    addNotification(`Сдача крови завершена!`, 'success');
+    addNotification(`Odběr krve dokončen!`, 'success');
   }, [addNotification]);
 
   const addDoctorNote = useCallback((donorId, note) => {
@@ -498,7 +513,12 @@ export function AppProvider({ children }) {
 
   // Reset data
   const resetData = useCallback(() => {
-    setState({ donors: INITIAL_DONORS, queueCounter: 1, lastQueueDate: new Date().toISOString().slice(0, 10), theme: 'dark' });
+    setState({ 
+      donors: INITIAL_DONORS, 
+      queueCounter: 1, 
+      lastQueueDate: new Date().toISOString().slice(0, 10), 
+      theme: 'light'
+    });
     setActiveDonorId(null);
     setNotifications([]);
     localStorage.removeItem(STORAGE_KEY);
@@ -517,9 +537,10 @@ export function AppProvider({ children }) {
     scanQrCode,
     checkIn,
     submitQuestionnaire,
+    approveQuestionnaire,
     acceptDocuments,
     startPressure,
-    approvePressure,
+    approveVitals,
     rejectDonor,
     acknowledgeRejection,
     takeBloodSample,

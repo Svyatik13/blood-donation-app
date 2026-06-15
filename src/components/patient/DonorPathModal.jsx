@@ -11,11 +11,11 @@ export default function DonorPathModal({ onClose }) {
   const donations = donor.totalDonations || 0;
 
   const milestones = [
-    { target: 1, label: t('milestone_1'), color: '#3498DB', desc: 'První darování krve' },
-    { target: 5, label: t('milestone_5'), color: '#CD7F32', desc: 'Bronzová medaile hrdiny' },
-    { target: 10, label: t('milestone_10'), color: '#C0C0C0', desc: 'Stříbrná medaile hrdiny' },
-    { target: 20, label: t('milestone_20'), color: '#FFD700', desc: 'Zlatá medaile hrdiny' },
-    { target: 50, label: 'Diamantový dárce', color: '#B9F2FF', desc: 'Nejvyšší ocenění za záchranu životů' },
+    { target: 1, label: t('milestone_1'), color: '#3498DB', desc: t('path_desc_1') },
+    { target: 5, label: t('milestone_5'), color: '#CD7F32', desc: t('path_desc_5') },
+    { target: 10, label: t('milestone_10'), color: '#C0C0C0', desc: t('path_desc_10') },
+    { target: 20, label: t('milestone_20'), color: '#FFD700', desc: t('path_desc_20') },
+    { target: 50, label: t('path_milestone_50'), color: '#B9F2FF', desc: t('path_desc_50') },
   ];
 
   return (
@@ -49,8 +49,8 @@ export default function DonorPathModal({ onClose }) {
                   <Droplets size={32} color="#fff" />
                 </div>
                 <div style={{ paddingTop: '10px' }}>
-                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--mob-text)' }}>Start</div>
-                  <div style={{ fontSize: '0.85rem', color: 'var(--mob-text-muted)' }}>Vaše cesta začíná</div>
+                  <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--mob-text)' }}>{t('path_start')}</div>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--mob-text-muted)' }}>{t('path_start_desc')}</div>
                 </div>
               </div>
 
@@ -76,20 +76,20 @@ export default function DonorPathModal({ onClose }) {
                     
                     <div style={{ paddingTop: '5px', flex: 1 }}>
                       <div style={{ fontWeight: 700, fontSize: '1.1rem', color: isReached ? m.color : 'var(--mob-text)' }}>
-                        {m.target} {m.target === 1 ? 'donace' : 'donací'}
+                        {m.target} {m.target === 1 ? t('path_donation_singular') : t('path_donation_plural')}
                       </div>
                       <div style={{ fontSize: '0.95rem', fontWeight: 600, marginTop: '2px', color: 'var(--mob-text)' }}>{m.label}</div>
                       <div style={{ fontSize: '0.8rem', color: 'var(--mob-text-muted)', marginTop: '4px' }}>{m.desc}</div>
                       
                       {isReached && (
                         <div style={{ marginTop: '8px', color: 'var(--success)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
-                          <CheckCircle2 size={14} /> Dosaženo
+                          <CheckCircle2 size={14} /> {t('path_reached')}
                         </div>
                       )}
                       
                       {isNext && (
                         <div style={{ marginTop: '8px', color: 'var(--primary)', fontSize: '0.8rem', fontWeight: 600 }}>
-                          Zbývá: {m.target - donations}
+                          {t('path_remaining')} {m.target - donations}
                         </div>
                       )}
                     </div>

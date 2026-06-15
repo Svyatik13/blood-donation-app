@@ -94,7 +94,7 @@ export default function PatientDetailModal({ donorId, onClose }) {
                 </span>
               </div>
               <div className="modal-field">
-                <span className="modal-field-label">Telefon</span>
+                <span className="modal-field-label">{docT('doc_modal_phone')}</span>
                 <span className="modal-field-value">{donor.phone || '—'}</span>
               </div>
               <div className="modal-field">
@@ -153,20 +153,20 @@ export default function PatientDetailModal({ donorId, onClose }) {
               <div className="modal-section-title">{docT('doc_modal_title_visit')}</div>
               <div className="modal-grid">
                 <div className="modal-field">
-                  <span className="modal-field-label">Příjezd</span>
+                  <span className="modal-field-label">{docT('doc_modal_arrival')}</span>
                   <span className="modal-field-value">
                     {formatTimestamp(visit.checkedInAt)}
                   </span>
                 </div>
                 <div className="modal-field">
-                  <span className="modal-field-label">Dotazník</span>
+                  <span className="modal-field-label">{docT('doc_modal_questionnaire')}</span>
                   <span className="modal-field-value">
                     {visit.questionnaireCompleted ? 'OK' : '...'}
                   </span>
                 </div>
                 {visit.questionnaireAnswers && (
                   <div className="modal-field" style={{ gridColumn: 'span 2' }}>
-                    <span className="modal-field-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Odpovědi v dotazníku</span>
+                    <span className="modal-field-label" style={{ marginBottom: '0.5rem', display: 'block' }}>{docT('doc_modal_questionnaire_answers')}</span>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', background: 'var(--doc-bg)', padding: '1rem', borderRadius: '8px' }}>
                       {[
                         { id: 'q1', text: docT('q_q1'), ok: 'yes' },
@@ -191,25 +191,43 @@ export default function PatientDetailModal({ donorId, onClose }) {
                   </div>
                 )}
                 <div className="modal-field">
-                  <span className="modal-field-label">Tlak</span>
+                  <span className="modal-field-label">{docT('vitals_bp')}</span>
                   <span className="modal-field-value">
-                    {visit.systolic && visit.diastolic ? `${visit.systolic}/${visit.diastolic}` : '—'}
+                    {visit.systolic && visit.diastolic ? `${visit.systolic}/${visit.diastolic} ${docT('vitals_unit_bp')}` : '—'}
                   </span>
                 </div>
                 <div className="modal-field">
-                  <span className="modal-field-label">Vzorek</span>
+                  <span className="modal-field-label">{docT('vitals_pulse')}</span>
+                  <span className="modal-field-value">
+                    {visit.heartRate ? `${visit.heartRate} ${docT('vitals_unit_pulse')}` : '—'}
+                  </span>
+                </div>
+                <div className="modal-field">
+                  <span className="modal-field-label">{docT('vitals_temp')}</span>
+                  <span className="modal-field-value">
+                    {visit.temperature ? `${visit.temperature} ${docT('vitals_unit_temp')}` : '—'}
+                  </span>
+                </div>
+                <div className="modal-field">
+                  <span className="modal-field-label">{docT('vitals_hemoglobin')}</span>
+                  <span className="modal-field-value">
+                    {visit.hemoglobin ? `${visit.hemoglobin} ${docT('vitals_unit_hemo')}` : '—'}
+                  </span>
+                </div>
+                <div className="modal-field">
+                  <span className="modal-field-label">{docT('doc_modal_sample')}</span>
                   <span className="modal-field-value">
                     {visit.bloodSampleTakenAt ? formatTimestamp(visit.bloodSampleTakenAt) : '—'}
                   </span>
                 </div>
                 <div className="modal-field">
-                  <span className="modal-field-label">Místnost</span>
+                  <span className="modal-field-label">{docT('doc_modal_room')}</span>
                   <span className="modal-field-value">
                     {visit.assignedRoom || '—'}
                   </span>
                 </div>
                 <div className="modal-field">
-                  <span className="modal-field-label">Objem</span>
+                  <span className="modal-field-label">{docT('doc_modal_volume')}</span>
                   <span className="modal-field-value">
                     {visit.bloodVolume ? `${visit.bloodVolume} ml` : '—'}
                   </span>
@@ -249,7 +267,7 @@ export default function PatientDetailModal({ donorId, onClose }) {
             {donor.donationHistory && donor.donationHistory.length > 0 ? (
               donor.donationHistory.map((entry, idx) => (
                 <div className="modal-history-item" key={idx}>
-                  <Calendar size={16} />
+                  <Calendar size={16} style={{ alignSelf: 'flex-start', marginTop: '2px' }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
                       {formatDate(entry.date)}
@@ -264,6 +282,23 @@ export default function PatientDetailModal({ donorId, onClose }) {
                       {entry.doctor}
                       {entry.notes ? ` · ${entry.notes}` : ''}
                     </div>
+                    {(entry.systolic || entry.heartRate || entry.temperature || entry.hemoglobin) && (
+                      <div
+                        style={{
+                          fontSize: '0.75rem',
+                          color: 'var(--doc-text-secondary)',
+                          marginTop: '2px',
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '6px'
+                        }}
+                      >
+                        {entry.systolic && entry.diastolic && <span>{docT('vitals_bp')}: {entry.systolic}/{entry.diastolic} {docT('vitals_unit_bp')}</span>}
+                        {entry.heartRate && <span>· {docT('vitals_pulse')}: {entry.heartRate} {docT('vitals_unit_pulse')}</span>}
+                        {entry.temperature && <span>· {docT('vitals_temp')}: {entry.temperature} {docT('vitals_unit_temp')}</span>}
+                        {entry.hemoglobin && <span>· {docT('vitals_hemoglobin')}: {entry.hemoglobin} {docT('vitals_unit_hemo')}</span>}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))

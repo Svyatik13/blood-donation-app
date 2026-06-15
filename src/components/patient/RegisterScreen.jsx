@@ -1,29 +1,57 @@
 import React, { useState } from 'react';
-import { UserPlus, Globe } from 'lucide-react';
+import { UserPlus, Globe, AlertCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export default function RegisterScreen({ onSwitchToLogin }) {
   const { registerDonor, t, lang, setLang } = useApp();
   const [step, setStep] = useState(1);
+  const [error, setError] = useState('');
 
-  const [lastName, setLastName] = useState('');
-  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName]       = useState('');
+  const [firstName, setFirstName]     = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
-  const [gender, setGender] = useState('male');
+  const [gender, setGender]           = useState('male');
 
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [passportNumber, setPassportNumber] = useState('');
-  const [address, setAddress] = useState('');
+  const [phone, setPhone]       = useState('');
+  const [email, setEmail]       = useState('');
+  const [address, setAddress]   = useState('');
   const [password, setPassword] = useState('');
 
-  const [bloodType, setBloodType] = useState('A+');
-  const [weight, setWeight] = useState('');
+  const [bloodType, setBloodType]           = useState('A+');
+  const [weight, setWeight]                 = useState('');
   const [chronicDiseases, setChronicDiseases] = useState('');
-  const [allergies, setAllergies] = useState('');
-  const [medications, setMedications] = useState('');
+  const [allergies, setAllergies]           = useState('');
+  const [medications, setMedications]       = useState('');
+
+  const toggleLang = () => setLang(lang === 'cs' ? 'uk' : 'cs');
+
+  const validate = () => {
+    if (step === 1) {
+      if (!lastName.trim())   return t('error_required_surname')   || 'Zadejte příjmení.';
+      if (!firstName.trim())  return t('error_required_name')      || 'Zadejte jméno.';
+      if (!dateOfBirth)       return t('error_required_dob')       || 'Zadejte datum narození.';
+    }
+    if (step === 2) {
+      if (!phone.trim())      return t('error_required_phone')     || 'Zadejte telefonní číslo.';
+      if (!password.trim())   return t('error_required_password')  || 'Zadejte heslo.';
+      if (password.length < 4) return t('error_password_short')   || 'Heslo musí mít alespoň 4 znaky.';
+    }
+    if (step === 3) {
+      if (!weight || Number(weight) < 30) return t('error_required_weight') || 'Zadejte váhu (min. 30 kg).';
+    }
+    return null;
+  };
+
+  const handleNext = () => {
+    const err = validate();
+    if (err) { setError(err); return; }
+    setError('');
+    setStep(step + 1);
+  };
 
   const handleSubmit = () => {
+    const err = validate();
+    if (err) { setError(err); return; }
     registerDonor({
       firstName,
       lastName,
@@ -32,7 +60,6 @@ export default function RegisterScreen({ onSwitchToLogin }) {
       gender,
       phone,
       email,
-      passportNumber,
       address,
       password,
       bloodType,
@@ -41,10 +68,6 @@ export default function RegisterScreen({ onSwitchToLogin }) {
       allergies,
       medications,
     });
-  };
-
-  const toggleLang = () => {
-    setLang(lang === 'cs' ? 'uk' : 'cs');
   };
 
   const stepLabels = [t('step_personal'), t('step_contacts'), t('step_medical')];
@@ -66,13 +89,12 @@ export default function RegisterScreen({ onSwitchToLogin }) {
           <h1 className="mob-login-title" style={{ fontSize: '1.4rem' }}>{t('register_title')}</h1>
         </div>
 
+        {/* Step dots */}
         <div className="mob-steps">
           {[1, 2, 3].map((s, i) => (
             <React.Fragment key={s}>
               {i > 0 && <div className="mob-step-line" />}
-              <div
-                className={`mob-step-dot${step === s ? ' active' : ''}${step > s ? ' done' : ''}`}
-              />
+              <div className={`mob-step-dot${step === s ? ' active' : ''}${step > s ? ' done' : ''}`} />
             </React.Fragment>
           ))}
         </div>
@@ -82,23 +104,36 @@ export default function RegisterScreen({ onSwitchToLogin }) {
             {stepLabels[step - 1]}
           </h3>
 
+          {/* Error banner */}
+          {error && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem',
+              marginBottom: '1rem', fontSize: '0.85rem', color: '#DC2626',
+            }}>
+              <AlertCircle size={15} style={{ flexShrink: 0 }} />
+              {error}
+            </div>
+          )}
+
           {step === 1 && (
             <div className="animate-slide-right">
               <div className="mob-input-group">
-                <label className="mob-input-label">{t('surname')}</label>
-                <input type="text" className="mob-input" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                <label className="mob-input-label">{t('surname')} *</label>
+                <input type="text" className="mob-input" value={lastName} onChange={e => { setLastName(e.target.value); setError(''); }} />
               </div>
               <div className="mob-input-group">
-                <label className="mob-input-label">{t('name')}</label>
-                <input type="text" className="mob-input" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                <label className="mob-input-label">{t('name')} *</label>
+                <input type="text" className="mob-input" value={firstName} onChange={e => { setFirstName(e.target.value); setError(''); }} />
               </div>
               <div className="mob-input-group">
-                <label className="mob-input-label">{t('dob')}</label>
-                <input type="date" className="mob-input" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
+                <label className="mob-input-label">{t('dob')} *</label>
+                <input type="date" className="mob-input" value={dateOfBirth} onChange={e => { setDateOfBirth(e.target.value); setError(''); }} />
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('gender')}</label>
-                <select className="mob-select" value={gender} onChange={(e) => setGender(e.target.value)}>
+                <select className="mob-select" value={gender} onChange={e => setGender(e.target.value)}>
                   <option value="male">{t('male')}</option>
                   <option value="female">{t('female')}</option>
                 </select>
@@ -109,24 +144,20 @@ export default function RegisterScreen({ onSwitchToLogin }) {
           {step === 2 && (
             <div className="animate-slide-right">
               <div className="mob-input-group">
-                <label className="mob-input-label">{t('phone_placeholder')}</label>
-                <input type="text" className="mob-input" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+                <label className="mob-input-label">{t('phone_placeholder')} *</label>
+                <input type="tel" className="mob-input" value={phone} onChange={e => { setPhone(e.target.value); setError(''); }} />
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('email')}</label>
-                <input type="email" className="mob-input" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <div className="mob-input-group">
-                <label className="mob-input-label">{t('passport')}</label>
-                <input type="text" className="mob-input" value={passportNumber} onChange={(e) => setPassportNumber(e.target.value)} required />
+                <input type="email" className="mob-input" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('address')}</label>
-                <input type="text" className="mob-input" value={address} onChange={(e) => setAddress(e.target.value)} />
+                <input type="text" className="mob-input" value={address} onChange={e => setAddress(e.target.value)} />
               </div>
               <div className="mob-input-group">
-                <label className="mob-input-label">{t('password_create')}</label>
-                <input type="password" className="mob-input" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <label className="mob-input-label">{t('password_create')} *</label>
+                <input type="password" className="mob-input" value={password} onChange={e => { setPassword(e.target.value); setError(''); }} />
               </div>
             </div>
           )}
@@ -135,39 +166,39 @@ export default function RegisterScreen({ onSwitchToLogin }) {
             <div className="animate-slide-right">
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('blood_group')}</label>
-                <select className="mob-select" value={bloodType} onChange={(e) => setBloodType(e.target.value)}>
-                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((bt) => (
+                <select className="mob-select" value={bloodType} onChange={e => setBloodType(e.target.value)}>
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bt => (
                     <option key={bt} value={bt}>{bt}</option>
                   ))}
                 </select>
               </div>
               <div className="mob-input-group">
-                <label className="mob-input-label">{t('weight')}</label>
-                <input type="number" className="mob-input" value={weight} onChange={(e) => setWeight(e.target.value)} min="30" required />
+                <label className="mob-input-label">{t('weight')} *</label>
+                <input type="number" className="mob-input" value={weight} onChange={e => { setWeight(e.target.value); setError(''); }} min="30" />
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('chronic_diseases')}</label>
-                <input type="text" className="mob-input" placeholder={t('none_placeholder')} value={chronicDiseases} onChange={(e) => setChronicDiseases(e.target.value)} />
+                <input type="text" className="mob-input" placeholder={t('none_placeholder')} value={chronicDiseases} onChange={e => setChronicDiseases(e.target.value)} />
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('allergies')}</label>
-                <input type="text" className="mob-input" placeholder={t('none_placeholder')} value={allergies} onChange={(e) => setAllergies(e.target.value)} />
+                <input type="text" className="mob-input" placeholder={t('none_placeholder')} value={allergies} onChange={e => setAllergies(e.target.value)} />
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('medications')}</label>
-                <input type="text" className="mob-input" placeholder={t('none_placeholder')} value={medications} onChange={(e) => setMedications(e.target.value)} />
+                <input type="text" className="mob-input" placeholder={t('none_placeholder')} value={medications} onChange={e => setMedications(e.target.value)} />
               </div>
             </div>
           )}
 
           <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem' }}>
             {step > 1 && (
-              <button type="button" className="mob-btn mob-btn-outline" onClick={() => setStep(step - 1)}>
+              <button type="button" className="mob-btn mob-btn-outline" onClick={() => { setError(''); setStep(step - 1); }}>
                 {t('btn_back')}
               </button>
             )}
             {step < 3 ? (
-              <button type="button" className="mob-btn mob-btn-primary" onClick={() => setStep(step + 1)}>
+              <button type="button" className="mob-btn mob-btn-primary" onClick={handleNext}>
                 {t('btn_next')}
               </button>
             ) : (

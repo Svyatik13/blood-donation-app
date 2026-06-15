@@ -25,7 +25,7 @@ export default function LoginScreen({ onSwitchToRegister }) {
       <div className="mob-content animate-fade-in">
         <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '1rem' }}>
           <button className="mob-btn-ghost" onClick={testModeLogin} style={{ padding: '0.5rem', borderRadius: '8px', color: 'var(--warning)', fontWeight: 600 }}>
-            Test Mode
+            {t('test_mode')}
           </button>
           <button className="mob-btn-ghost" onClick={toggleLang} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem', borderRadius: '8px' }}>
             <Globe size={18} />

@@ -5,6 +5,7 @@ import LandingPage from './components/LandingPage';
 import DoctorDashboard from './components/DoctorDashboard';
 import PatientMobileApp from './components/PatientMobileApp';
 import ReceptionDashboard from './components/ReceptionDashboard';
+import WaitingRoomBoard from './components/WaitingRoomBoard';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/board" element={<WaitingRoomBoard />} />
           <Route path="/patient" element={
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', background: '#0F0F14' }}>
               <PatientMobileApp />
