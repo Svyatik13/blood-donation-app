@@ -61,7 +61,7 @@ export default function DoctorSidebar({ activeTab, onTabChange }) {
         <div className="logo-icon">
           <Droplets size={18} />
         </div>
-        <h2>BloodLife</h2>
+        <h2>Odběr krve</h2>
       </div>
 
       <nav className="doc-nav">

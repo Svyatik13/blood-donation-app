@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { QrCode, Droplets, CalendarCheck, Medal, ClipboardCheck } from 'lucide-react';
+import QRCode from 'react-qr-code';
 import confetti from 'canvas-confetti';
 import { useApp } from '../../context/AppContext';
 import StatusScreen from './StatusScreen';
@@ -152,14 +153,19 @@ export default function HomeTab({ onShowQuestionnaire }) {
             <p style={{ color: 'var(--mob-text-muted)', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
               {donor.status === 'registered' || donor.status === 'scanned' ? t('qr_show_hint') : t('qr_your_id')}
             </p>
-            <div className="mob-qr scanner-laser-container">
-              <QrCode size={160} color="var(--doc-text)" />
-              {(donor.status === 'registered' || donor.status === 'scanned') && (
-                <div className="scanner-laser-line" />
-              )}
+            <div style={{ 
+              display: 'inline-flex', 
+              padding: '1.25rem', 
+              background: '#FFFFFF', 
+              borderRadius: '16px', 
+              boxShadow: '0 8px 24px rgba(0,0,0,0.08)', 
+              border: '1px solid rgba(0,0,0,0.05)',
+              marginBottom: '1rem' 
+            }}>
+              <QRCode value={donor.id} size={180} fgColor="#0F172A" bgColor="#FFFFFF" />
             </div>
-            <p style={{ fontWeight: 700, fontSize: '1.2rem', letterSpacing: '2px' }}>
-              {donor.id.toUpperCase()}
+            <p style={{ fontWeight: 700, fontSize: '1.2rem', letterSpacing: '4px' }}>
+              {donor.id.slice(0, 8).toUpperCase()}
             </p>
           </div>
 

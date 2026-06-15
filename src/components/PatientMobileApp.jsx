@@ -10,7 +10,7 @@ import QuestionnaireScreen from './patient/QuestionnaireScreen';
 import MobileNavBar from './patient/MobileNavBar';
 
 export default function PatientMobileApp() {
-  const { activeDonorId, theme, getActiveDonor, scanQrCode, docT } = useApp();
+  const { activeDonorId, theme, getActiveDonor, scanQrCode, docT, logoutDonor } = useApp();
   const [screen, setScreen] = useState(activeDonorId ? 'app' : 'login');
   const donor = getActiveDonor();
   const [activeTab, setActiveTab] = useState('home');
@@ -50,7 +50,17 @@ export default function PatientMobileApp() {
               <motion.div key="app" className="mob-scroll-wrapper" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.3 }} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div className="mob-scroll">
                   <AnimatePresence mode="wait">
-                    {(showQuestionnaire || (donor?.status === 'checked-in' && !donor?.currentVisit?.questionnaireCompleted)) ? (
+                    {!donor ? (
+                      <motion.div key="loading" className="mob-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', textAlign: 'center', padding: '2rem' }}>
+                        <h3 style={{ color: 'var(--danger)', marginBottom: '1rem' }}>Data nenalezena</h3>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                          Pokud jste se právě zaregistrovali, pravděpodobně máte v konzoli Firebase zablokovaná práva pro čtení/zápis (Firestore Rules).
+                        </p>
+                        <button className="mob-btn mob-btn-outline" onClick={() => logoutDonor()}>
+                          Odhlásit se a zkusit znovu
+                        </button>
+                      </motion.div>
+                    ) : (showQuestionnaire || (donor?.status === 'checked-in' && !donor?.currentVisit?.questionnaireCompleted)) ? (
                       <motion.div key="questionnaire" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.2 }}>
                         <QuestionnaireScreen onComplete={() => setShowQuestionnaire(false)} />
                       </motion.div>

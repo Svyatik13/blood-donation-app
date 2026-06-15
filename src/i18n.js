@@ -3,7 +3,7 @@ export const translations = {
     // Login & Register
     login_title: 'Krevní Život',
     login_subtitle: 'Zachraňte život ještě dnes',
-    phone_placeholder: '+420 123 456 789',
+    phone_placeholder: 'Telefonní číslo',
     password_placeholder: 'Heslo',
     login_btn: 'Přihlásit se',
     no_account: 'Nemáte účet? Zaregistrujte se',
@@ -22,6 +22,7 @@ export const translations = {
     passport: 'Číslo pasu / OP',
     address: 'Adresa',
     password_create: 'Vytvořte heslo',
+    password_confirm: 'Zopakujte heslo',
     blood_group: 'Krevní skupina',
     weight: 'Váha (kg)',
     chronic_diseases: 'Chronická onemocnění',
@@ -34,6 +35,17 @@ export const translations = {
     have_account: 'Máte už účet? Přihlaste se',
     login_error: 'Chyba přihlášení',
     test_mode: 'Testovací režim',
+    
+    // Validation Errors
+    error_required_surname: 'Zadejte příjmení.',
+    error_required_name: 'Zadejte jméno.',
+    error_required_dob: 'Zadejte datum narození.',
+    error_required_phone: 'Zadejte telefonní číslo.',
+    error_required_email: 'Zadejte platný e-mail.',
+    error_required_password: 'Zadejte heslo.',
+    error_password_short: 'Heslo musí mít alespoň 6 znaků.',
+    error_password_match: 'Hesla se neshodují.',
+    error_required_weight: 'Zadejte váhu (min. 30 kg).',
 
     // App Navigation
     nav_home: 'Hlavní',
@@ -60,7 +72,7 @@ export const translations = {
     qr_your_id: 'Váš identifikátor',
 
     // Profile
-    profile_phone: 'Telefon',
+    profile_phone: 'Tel. číslo',
     profile_logout: 'Odhlásit se',
 
     // Status Screen
@@ -271,7 +283,7 @@ export const translations = {
     // Login & Register
     login_title: 'Кров Заради Життя',
     login_subtitle: 'Врятуйте життя сьогодні',
-    phone_placeholder: '+380 50 123 45 67',
+    phone_placeholder: 'Номер телефону',
     password_placeholder: 'Пароль',
     login_btn: 'Увійти',
     no_account: 'Немає акаунту? Зареєструйтесь',
@@ -290,6 +302,7 @@ export const translations = {
     passport: 'Номер паспорта',
     address: 'Адреса',
     password_create: 'Створіть пароль',
+    password_confirm: 'Підтвердіть пароль',
     blood_group: 'Група крові',
     weight: 'Вага (кг)',
     chronic_diseases: 'Хронічні захворювання',
@@ -302,6 +315,17 @@ export const translations = {
     have_account: 'Вже є акаунт? Увійдіть',
     login_error: 'Помилка входу',
     test_mode: 'Тестовий режим',
+
+    // Validation Errors
+    error_required_surname: 'Введіть прізвище.',
+    error_required_name: 'Введіть ім\'я.',
+    error_required_dob: 'Введіть дату народження.',
+    error_required_phone: 'Введіть номер телефону.',
+    error_required_email: 'Введіть дійсний email.',
+    error_required_password: 'Введіть пароль.',
+    error_password_short: 'Пароль повинен містити щонайменше 6 символів.',
+    error_password_match: 'Паролі не збігаються.',
+    error_required_weight: 'Введіть вагу (мін. 30 кг).',
 
     // App Navigation
     nav_home: 'Головна',
@@ -328,7 +352,7 @@ export const translations = {
     qr_your_id: 'Ваш ідентифікатор',
 
     // Profile
-    profile_phone: 'Телефон',
+    profile_phone: 'Номер телефону',
     profile_logout: 'Вийти',
 
     // Status Screen

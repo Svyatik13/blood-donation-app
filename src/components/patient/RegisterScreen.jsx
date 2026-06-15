@@ -9,13 +9,15 @@ export default function RegisterScreen({ onSwitchToLogin }) {
 
   const [lastName, setLastName]       = useState('');
   const [firstName, setFirstName]     = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [dobDay, setDobDay]           = useState('');
+  const [dobMonth, setDobMonth]       = useState('');
+  const [dobYear, setDobYear]         = useState('');
   const [gender, setGender]           = useState('male');
 
   const [phone, setPhone]       = useState('');
   const [email, setEmail]       = useState('');
-  const [address, setAddress]   = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [bloodType, setBloodType]           = useState('A+');
   const [weight, setWeight]                 = useState('');
@@ -29,12 +31,14 @@ export default function RegisterScreen({ onSwitchToLogin }) {
     if (step === 1) {
       if (!lastName.trim())   return t('error_required_surname')   || 'Zadejte příjmení.';
       if (!firstName.trim())  return t('error_required_name')      || 'Zadejte jméno.';
-      if (!dateOfBirth)       return t('error_required_dob')       || 'Zadejte datum narození.';
+      if (!dobDay || !dobMonth || !dobYear || dobYear.length !== 4) return t('error_required_dob') || 'Zadejte platné datum narození.';
     }
     if (step === 2) {
       if (!phone.trim())      return t('error_required_phone')     || 'Zadejte telefonní číslo.';
+      if (!email.trim())      return t('error_required_email')     || 'Zadejte e-mail.';
       if (!password.trim())   return t('error_required_password')  || 'Zadejte heslo.';
-      if (password.length < 4) return t('error_password_short')   || 'Heslo musí mít alespoň 4 znaky.';
+      if (password.length < 6) return t('error_password_short')   || 'Heslo musí mít alespoň 6 znaků.';
+      if (password !== confirmPassword) return t('error_password_match') || 'Hesla se neshodují.';
     }
     if (step === 3) {
       if (!weight || Number(weight) < 30) return t('error_required_weight') || 'Zadejte váhu (min. 30 kg).';
@@ -49,25 +53,28 @@ export default function RegisterScreen({ onSwitchToLogin }) {
     setStep(step + 1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const err = validate();
     if (err) { setError(err); return; }
-    registerDonor({
-      firstName,
-      lastName,
-      middleName: '',
-      dateOfBirth,
-      gender,
-      phone,
-      email,
-      address,
-      password,
-      bloodType,
-      weight: Number(weight) || 0,
-      chronicDiseases,
-      allergies,
-      medications,
-    });
+    try {
+      await registerDonor({
+        firstName,
+        lastName,
+        middleName: '',
+        dateOfBirth: `${dobYear}-${dobMonth.padStart(2, '0')}-${dobDay.padStart(2, '0')}`,
+        gender,
+        phone,
+        email,
+        password,
+        bloodType,
+        weight: Number(weight) || 0,
+        chronicDiseases,
+        allergies,
+        medications,
+      });
+    } catch (e) {
+      setError(e.message || "Registration failed");
+    }
   };
 
   const stepLabels = [t('step_personal'), t('step_contacts'), t('step_medical')];
@@ -129,7 +136,11 @@ export default function RegisterScreen({ onSwitchToLogin }) {
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('dob')} *</label>
-                <input type="date" className="mob-input" value={dateOfBirth} onChange={e => { setDateOfBirth(e.target.value); setError(''); }} />
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input type="tel" className="mob-input" placeholder="DD" maxLength={2} value={dobDay} onChange={e => { setDobDay(e.target.value.replace(/\D/g, '')); setError(''); }} style={{ flex: 1, textAlign: 'center' }} />
+                  <input type="tel" className="mob-input" placeholder="MM" maxLength={2} value={dobMonth} onChange={e => { setDobMonth(e.target.value.replace(/\D/g, '')); setError(''); }} style={{ flex: 1, textAlign: 'center' }} />
+                  <input type="tel" className="mob-input" placeholder="YYYY" maxLength={4} value={dobYear} onChange={e => { setDobYear(e.target.value.replace(/\D/g, '')); setError(''); }} style={{ flex: 2, textAlign: 'center' }} />
+                </div>
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('gender')}</label>
@@ -148,16 +159,16 @@ export default function RegisterScreen({ onSwitchToLogin }) {
                 <input type="tel" className="mob-input" value={phone} onChange={e => { setPhone(e.target.value); setError(''); }} />
               </div>
               <div className="mob-input-group">
-                <label className="mob-input-label">{t('email')}</label>
-                <input type="email" className="mob-input" value={email} onChange={e => setEmail(e.target.value)} />
-              </div>
-              <div className="mob-input-group">
-                <label className="mob-input-label">{t('address')}</label>
-                <input type="text" className="mob-input" value={address} onChange={e => setAddress(e.target.value)} />
+                <label className="mob-input-label">{t('email')} *</label>
+                <input type="email" className="mob-input" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} />
               </div>
               <div className="mob-input-group">
                 <label className="mob-input-label">{t('password_create')} *</label>
                 <input type="password" className="mob-input" value={password} onChange={e => { setPassword(e.target.value); setError(''); }} />
+              </div>
+              <div className="mob-input-group">
+                <label className="mob-input-label">{t('password_confirm')} *</label>
+                <input type="password" className="mob-input" value={confirmPassword} onChange={e => { setConfirmPassword(e.target.value); setError(''); }} />
               </div>
             </div>
           )}

@@ -17,7 +17,6 @@ export default function ProfileTab() {
     setForm({
       phone:           donor.phone           || '',
       email:           donor.email           || '',
-      address:         donor.address         || '',
       weight:          donor.weight          || '',
       chronicDiseases: donor.chronicDiseases || '',
       allergies:       donor.allergies       || '',
@@ -61,14 +60,13 @@ export default function ProfileTab() {
           <User size={40} color="#fff" />
         </div>
         <h2 className="mob-profile-name">{donor.lastName} {donor.firstName}</h2>
-        <div className="mob-profile-id">ID: {donor.id}</div>
+        <div className="mob-profile-id">ID: {donor.id.slice(0, 8).toUpperCase()}</div>
       </div>
 
       {/* ── READ-ONLY card ── */}
       <SectionCard title={t('step_personal') || 'Osobní'} icon={<Lock size={13} color={colors.textMuted} />}>
         <InfoRow label={t('dob')        || 'Datum nar.'} value={donor.dateOfBirth} />
         <InfoRow label={t('blood_group')|| 'Krev'}       value={donor.bloodType} highlight />
-        <InfoRow label={t('passport')   || 'Doklad'}     value={donor.passportNumber} />
       </SectionCard>
 
       {/* ── EDITABLE card ── */}
@@ -87,15 +85,13 @@ export default function ProfileTab() {
       >
         {editing ? (
           <>
-            <Field label={t('phone_placeholder') || 'Telefon'} type="tel"    value={form.phone}   onChange={set('phone')} />
+            <Field label={t('profile_phone') || 'Telefon'} type="tel"    value={form.phone}   onChange={set('phone')} />
             <Field label={t('email')             || 'E-mail'}  type="email"  value={form.email}   onChange={set('email')} />
-            <Field label={t('address')           || 'Adresa'}  type="text"   value={form.address} onChange={set('address')} />
           </>
         ) : (
           <>
-            <InfoRow label={t('phone_placeholder') || 'Telefon'} value={donor.phone} />
+            <InfoRow label={t('profile_phone') || 'Telefon'} value={donor.phone} />
             <InfoRow label={t('email')             || 'E-mail'}  value={donor.email || '—'} />
-            <InfoRow label={t('address')           || 'Adresa'}  value={donor.address || '—'} />
           </>
         )}
       </SectionCard>

@@ -72,7 +72,7 @@ export default function LandingPage() {
             <Droplets size={20} color="#fff" />
           </div>
           <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111111', letterSpacing: '-0.02em' }}>
-            BloodLife
+            Odběr krve
           </span>
         </div>
         <p style={{ color: '#6B7280', fontSize: '0.95rem', margin: 0 }}>

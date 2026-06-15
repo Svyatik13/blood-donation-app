@@ -4,13 +4,13 @@ import { useApp } from '../../context/AppContext';
 
 export default function LoginScreen({ onSwitchToRegister }) {
   const { loginDonor, testModeLogin, t, lang, setLang } = useApp();
-  const [phone, setPhone] = React.useState('');
+  const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const donor = loginDonor(phone, password);
+    const donor = await loginDonor(email, password);
     if (!donor) {
       setError(t('login_error'));
     }
@@ -44,17 +44,23 @@ export default function LoginScreen({ onSwitchToRegister }) {
         <form className="mob-card" onSubmit={handleLogin}>
           <div className="mob-input-group">
             <input
-              type="tel"
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="username"
               className="mob-input"
-              placeholder={t('phone_placeholder')}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="mob-input-group">
             <input
+              id="password"
+              name="password"
               type="password"
+              autoComplete="current-password"
               className="mob-input"
               placeholder={t('password_placeholder')}
               value={password}
