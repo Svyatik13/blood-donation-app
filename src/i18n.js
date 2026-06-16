@@ -1,7 +1,7 @@
 export const translations = {
   cs: {
     // Login & Register
-    login_title: 'Krevní Život',
+    login_title: 'Odběr Krve',
     login_subtitle: 'Zachraňte život ještě dnes',
     phone_placeholder: 'Telefonní číslo',
     password_placeholder: 'Heslo',
@@ -127,7 +127,7 @@ export const translations = {
     path_remaining: 'Zbývá:',
 
     // Landing Page
-    landing_title: 'Krevní Život',
+    landing_title: 'Odběr Krve',
     landing_subtitle: 'Vyberte svou roli v systému',
     landing_donor: 'Dárce',
     landing_donor_desc: 'Mobilní aplikace pro pacienty: rezervace, dotazník, cesta dárce.',
@@ -281,7 +281,7 @@ export const translations = {
   },
   uk: {
     // Login & Register
-    login_title: 'Кров Заради Життя',
+    login_title: 'Здача Крові',
     login_subtitle: 'Врятуйте життя сьогодні',
     phone_placeholder: 'Номер телефону',
     password_placeholder: 'Пароль',
@@ -407,7 +407,7 @@ export const translations = {
     path_remaining: 'Залишилось:',
 
     // Landing Page (not used for patient, but kept for completeness)
-    landing_title: 'Кров Заради Життя',
+    landing_title: 'Здача Крові',
     landing_subtitle: 'Оберіть свою роль у системі',
     landing_donor: 'Донор',
     landing_donor_desc: 'Мобільний додаток для пацієнтів: бронювання, анкета, шлях донора.',
